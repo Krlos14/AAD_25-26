@@ -82,7 +82,7 @@ public class ACT_1_2 implements CommandLineRunner {
     }
 
 
-    static void consultarAlumno() throws IOException {// Consulta aleatoria por índice (0-based). Sin clase Alumno, imprime campos
+    static void consultarAlumno() throws IOException {// Consulta aleatoria por indice (0-based). Sin clase Alumno, imprime campos
         log.info("Posición (0-based): ");
         long index = Long.parseLong(s.nextLine().trim());
 
