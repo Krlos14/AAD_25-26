@@ -38,28 +38,28 @@ public class AadApplication implements CommandLineRunner {
                 String[] parts = line.split(",");
                 if (parts.length < 3) continue;
 
-                student s = new student();
-                s.setId(Integer.parseInt(parts[0].trim()));
+                student s = new student(); //instacia student
+                s.setId(Integer.parseInt(parts[0].trim())); //s.set--- sirve para darle a id, name y nota un valor o nombre
                 s.setName(parts[1].trim());
                 s.setNota(Double.parseDouble(parts[2].trim()));
-                list.add(s);
+                list.add(s);//Añade el estudiante leido a la lista (array)
             }
         }
 
-        // Uso de métodos
+        // Uso de métodos para crear los archivos .json y .xml
         writeJSON(list, "src/main/resources/students.json");
         writeXML(list, "src/main/resources/students.xml");
     }
 
     // Convertir lista a JSON
     private void writeJSON(List<student> list, String path) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), list);
+        ObjectMapper mapper = new ObjectMapper(); //Instancia para json
+        mapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), list);//escribe en un archivo .json guardado en list y con el PrettyPrinter para que se vea mejor
     }
 
     // Convertir lista a XML
     private void writeXML(List<student> students, String path) throws IOException {
-        XmlMapper xmlMapper = new XmlMapper();
-        xmlMapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), students);
+        XmlMapper xmlMapper = new XmlMapper();//Instancia para Xml
+        xmlMapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), students);//escribe en un archivo .xml guardado en list y con el PrettyPrinter para que se vea mejor
     }
 }
