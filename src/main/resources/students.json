@@ -1,0 +1,13 @@
+[ {
+  "name" : "Ana",
+  "id" : 1,
+  "nota" : 8.5
+}, {
+  "name" : "Juan",
+  "id" : 2,
+  "nota" : 6.7
+}, {
+  "name" : "Luis",
+  "id" : 3,
+  "nota" : 9.0
+} ]
