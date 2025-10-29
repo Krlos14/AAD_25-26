@@ -25,7 +25,7 @@ public class AadApplication implements CommandLineRunner {
     public static void addEvent() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("src/main/resources/app.log", true), charset))) {
             Date now = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");//Pone el formato deseado para la fecha
             String dateFormate = sdf.format(now);
 
             log.info("Write the event message:");
