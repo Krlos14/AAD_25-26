@@ -24,13 +24,14 @@ public class AadApplication implements CommandLineRunner {
 
     public static void addEvent() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("src/main/resources/app.log", true), charset))) {
+            //Sirve para obtener fecha y hora actual
             Date now = new Date();
-            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");//Pone el formato deseado para la fecha
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             String dateFormate = sdf.format(now);
-
+            //Solicita un mensaje para el evento
             log.info("Write the event message:");
             String event = s.nextLine();
-
+            //Escribe los datos en el archivo
             log.info("Date automatically set: {}", dateFormate);
             writer.write("[" + dateFormate + "] Usuario: " + event);
             writer.newLine();
@@ -42,7 +43,7 @@ public class AadApplication implements CommandLineRunner {
     public static void filterEvent() {
         log.info("Enter a date of the event for filter");
         String date = s.nextLine();
-
+        //Lee linea a linea el archivo y va comparando con la fecha puesta para ver si hay alguna o no y te la muestra en pantalla
         try (BufferedReader rw = new BufferedReader(new InputStreamReader(new FileInputStream("src/main/resources/app.log"), charset))) {
             String line = "";
             // boolean find = false
@@ -56,7 +57,7 @@ public class AadApplication implements CommandLineRunner {
     }
 
     public static void configurateCodi() {
-
+        //Menu para selecionar una codificación
         log.info("Configuration default is: {} ", charset);
         log.info("Select a new configuration");
         log.info("1) UTF-8");
