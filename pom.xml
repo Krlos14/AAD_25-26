@@ -30,6 +30,11 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
+        </dependency>
         <!-- Dependencia en pom.xml para incluir el driver PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
