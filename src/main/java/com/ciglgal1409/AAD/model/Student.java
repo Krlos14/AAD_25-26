@@ -10,9 +10,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
-    private Integer id;
-    private String firstName;
-    private String lastName;
-    private LocalDate birthDate;
-    private Double averageGrade;
+    private int id;
+    private String nif;
+    private String name;
+    private String email;
+    //private String curse;
+    //private List<Module> modules;
 }

@@ -4,14 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class Module {
-    private int id;
-    private String code;
-    private String name;
-    private int hours;
+public class Enrollment {
+
+    private int studentId;
+    private int moduleId;
+    private LocalDate date;
 }

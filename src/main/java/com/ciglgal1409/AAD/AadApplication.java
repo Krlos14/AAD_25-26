@@ -1,19 +1,27 @@
 package com.ciglgal1409.AAD;
 
+import com.ciglgal1409.AAD.application.StudentManagementService;
+import com.ciglgal1409.AAD.config.PostgresqlDriver;
+import com.ciglgal1409.AAD.model.Student;
+import com.ciglgal1409.AAD.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
+import com.ciglgal1409.AAD.model.Module;
 import java.sql.Connection;
+import java.util.List;
 
 @SpringBootApplication
 @Slf4j
 @RequiredArgsConstructor
 public class AadApplication implements CommandLineRunner {
     private final PostgresqlDriver postgresqlDriver;
+    private final StudentRepository studentRepository;
+    private final StudentManagementService studentManagementService;
+
 
     public static void main(String[] args) {
         SpringApplication.run(AadApplication.class, args);
@@ -21,37 +29,14 @@ public class AadApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        log.info("Testing JDBC connection...");
-        try (Connection conn = postgresqlDriver.getConnection()) {
-            log.info("Connection successful: {}",
-                    conn.getMetaData().getURL());
-            log.info("Database: {}",
-                    conn.getMetaData().getDatabaseProductName());
-        } catch (Exception e) {
-            System.err.println("Connection failed: " + e.getMessage());
-        }
-    }
+        Student miriam = new Student(2, "66280457F", "Miriam", "miriam@g.educaand.et");
+        Module programacion = new Module(2, "0425", "Programacion", 250);
+        miriam = studentManagementService.createStudent(miriam);
+        programacion = studentManagementService.createModule(programacion);
+        int modulosMatriculados = studentManagementService.countEnrollments(miriam.getId());
+        log.info("{} módulos matriculados para el alumno {}", modulosMatriculados, miriam.getName());
+        studentManagementService.enrollStudentInModule(miriam.getId(), programacion.getId());
+        studentRepository.delete(miriam.getId());
 
-    @Bean
-    CommandLineRunner testRepo(com.ciglgal1409.AAD.repository.StudentJdbcRepository repo) {
-        return args -> {
-            // CREATE
-            var s = new com.ciglgal1409.AAD.model.Student(
-                    null, "Lucia", "Martinez",
-                    java.time.LocalDate.of(2004, 5, 10), 8.7
-            );
-            s = repo.create(s);
-
-            // READ
-            var found = repo.read(new com.ciglgal1409.AAD.model.Student(s.getId(), null, null, null, null));
-            System.out.println("Read: " + found);
-
-            // UPDATE
-            found.setAverageGrade(9.2);
-            repo.update(found);
-
-            // DELETE
-            repo.delete(found);
-        };
     }
 }
