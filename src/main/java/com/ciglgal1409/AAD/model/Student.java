@@ -1,14 +1,14 @@
 package com.ciglgal1409.AAD.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
+@Getter
+@Setter
+
 public class Student {
     private int id;
     private String nif;

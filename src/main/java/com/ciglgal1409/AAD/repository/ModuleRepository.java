@@ -1,19 +1,20 @@
 package com.ciglgal1409.AAD.repository;
 
-import com.ciglgal1409.AAD.config.PostgresqlDriver;
 import com.ciglgal1409.AAD.model.Module;
-import com.ciglgal1409.AAD.model.Student;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import java.sql.*;
-import java.util.ArrayList;
+
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
 @Slf4j
 @RequiredArgsConstructor
-public class ModuleRepository implements CustomService<Module> {
+public class ModuleRepository implements CrudRepository<Module> {
 
     private static final String SQL_INSERT = """
             INSERT INTO modulo (codigo, nombre, horas)
@@ -42,116 +43,77 @@ public class ModuleRepository implements CustomService<Module> {
             WHERE id_modulo = ?
             """;
 
-    private final PostgresqlDriver postgresqlDriver;
+    private final JdbcTemplate jdbcTemplate;
 
-   
+
 
     @Override
-    public Module insert(Module entity) {
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL_INSERT, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, entity.getCode());
-            ps.setString(2, entity.getName());
-            ps.setInt(3, entity.getHours());
-            ps.executeUpdate();
-
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) entity.setId(keys.getInt(1));
-            }
-            log.info("create OK: {}", entity);
-            return entity;
-        } catch (SQLException e) {
-            throw new RuntimeException("Error creatingModule", e);
+    public Module insert(Module mod) {
+        if (mod == null) throw new IllegalArgumentException("Student cannot be null");
+        KeyHolder kh = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(SQL_INSERT, new String[] {"id_modulo"});
+            ps.setString(1, mod.getCode());
+            ps.setString(2, mod.getName());
+            ps.setInt(3, mod.getHours());
+            return ps;
+        }, kh);
+        Number key = kh.getKey();
+        if (key != null) {
+            mod.setId(key.intValue());
         }
+        log.info("create OK: {}", mod);
+        return mod;
     }
 
     @Override
     public List<Module> findAll() {
-       List<Module> modules = new ArrayList<>();
-
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL_SELECT);
-             ResultSet rs = ps.executeQuery()) {
-           while (rs.next()) {
-               Module module = mapRow(rs);
-           }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error readingModule", e);
-        }
-        return modules;
-    }
-    public Module findById(Integer id) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-            conn = postgresqlDriver.getConnection();  // ⚠️
-            ps = conn.prepareStatement(SQL_SELECT_BY_ID);
-            ps.setInt(1, id);
-            rs = ps.executeQuery();
-
-            if (rs.next()) {
-                Module s = mapRow(rs);
-                log.info("findById OK: {}", s);
-                return s;
-            } else {
-                log.info("findById NOOP for id={}", id);
-                return null;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error finding Module id=" + id, e);
-        } finally {
-            // Cerrar solo Statement y ResultSet, NO la Connection
-            try {
-                if (rs != null) rs.close();
-            } catch (SQLException e) {
-                log.warn("Error closing ResultSet", e);
-            }
-            try {
-                if (ps != null) ps.close();
-            } catch (SQLException e) {
-                log.warn("Error closing PreparedStatement", e);
-            }
-            // ⚠️NO cerrar conn aquí - se cerrará en commit()/rollback()
-        }
+        log.info("Ejecutando findAll Modules");
+        List<Module> mod = jdbcTemplate.query(
+                SQL_SELECT,
+                (rs, rowNum) -> new Module(
+                        rs.getInt("id_modulo"),
+                        rs.getString("codigo"),
+                        rs.getString("nombre"),
+                        rs.getInt("horas")
+                )
+        );
+        log.info("FindAll Modules OK");
+        return mod;
     }
 
     @Override
-    public Module update(Module entity) {
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL_UPDATE)) {
-            ps.setString(1, entity.getCode());
-            ps.setString(2, entity.getName());
-            ps.setInt(3, entity.getHours());
-            ps.setInt(4, entity.getId());
-            ps.executeUpdate();
-            log.info("update OK: {}", entity);
-            return entity;
-        } catch (SQLException e) {
-            throw new RuntimeException("Error updatingModule", e);
+    public Module findById(int id) {
+        List<Module> mod = jdbcTemplate.query(
+                SQL_SELECT_BY_ID,
+                (rs, rowNum) -> new Module(
+                        rs.getInt("id_modulo"),
+                        rs.getString("codigo"),
+                        rs.getString("nombre"),
+                        rs.getInt("horas")
+                ),
+                id
+        );
+        log.info("FindById Modules OK id={}", id);
+        return mod.isEmpty() ? null : mod.get(0);
+    }
+
+
+    @Override
+    public Module update(Module mod) {
+        int updated = jdbcTemplate.update(SQL_UPDATE, mod.getCode(), mod.getName(), mod.getHours(), mod.getId());
+        if (updated == 0)
+        {
+            throw new RuntimeException("Modulo no encontrado : id=" + mod.getId());
         }
+        log.info("Modulo actualizado OK id={}", mod.getId());
+        return mod;
     }
 
     @Override
-    public boolean delete(Integer id) {
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
-            ps.setInt(1, id );
-            int deleted = ps.executeUpdate();
-            log.info("delete OK: {}", deleted > 0);
-            return deleted > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Error deletingModule", e);
-        }
-    }
-
-    private Module mapRow(ResultSet rs) throws SQLException {
-       Module m = new Module();
-        m.setId(rs.getInt("id_modulo"));
-        m.setCode(rs.getString("codigo"));
-        m.setName(rs.getString("nombre"));
-        m.setHours(rs.getInt("horas"));
-        return m;
+    public boolean delete(int id) {
+        int borra = jdbcTemplate.update(SQL_DELETE, id);
+        log.info("Modulos eliminados OK id = {}", id);
+        return borra > 0;
     }
 }

@@ -1,15 +1,16 @@
 package com.ciglgal1409.AAD.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+
 import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Getter
+@Setter
+
 public class Enrollment {
 
     private int studentId;

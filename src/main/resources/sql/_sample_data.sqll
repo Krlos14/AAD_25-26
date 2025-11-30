@@ -1,0 +1,34 @@
+INSERT INTO alumno (nif, nombre, email) VALUES
+('12345678A', 'Juan Lema', 'juan.lema@example.com'),
+('87654321B', 'María Teresa', 'mariatere@example.com'),
+('11223344C', 'Carlos Soler', 'carlossol@example.com'),
+('44332211D', 'Lucía Castro', 'luciacastro@example.com');
+
+-- ---------- MÓDULOS ----------
+INSERT INTO modulo (codigo, nombre, horas) VALUES
+('0800', 'Programación Sencilla', 200),
+('0700', 'Acceso a Datos', 120),
+('0660', 'Sistemas Informáticos', 90),
+('0750', 'Entornos de Desarrollo', 80),
+('0680', 'Lenguajes de Marcas', 70);
+
+-- ---------- MATRÍCULAS ----------
+-- Juan Lema (id_alumno = 1)
+INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES
+(1, 1, '2024-09-01'),
+(1, 2, '2024-09-01'),
+(1, 3, '2024-09-02');
+
+-- María Teresa (id_alumno = 2)
+INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES
+(2, 1, '2024-09-05'),
+(2, 4, '2024-09-05');
+
+-- Carlos Soler (id_alumno = 3)
+INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES
+(3, 2, '2024-09-10');
+
+-- Lucía Castro (id_alumno = 4)
+INSERT INTO matricula (id_alumno, id_modulo, fecha) VALUES
+(4, 3, '2024-09-12'),
+(4, 5, '2024-09-12');

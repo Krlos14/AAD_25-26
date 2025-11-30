@@ -1,12 +1,15 @@
 package com.ciglgal1409.AAD.repository;
 
-import com.ciglgal1409.AAD.config.PostgresqlDriver;
 import com.ciglgal1409.AAD.model.Enrollment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
-import java.sql.*;
-import java.util.ArrayList;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
@@ -18,11 +21,11 @@ public class EnrollementRepository {
             INSERT INTO matricula (id_alumno, id_modulo, fecha)
             VALUES (?, ?, ?)
             """;
-    private static final String SQL_FINDALL = """
+    private static final String SQL_FIND_ALL = """
             SELECT *
             FROM matricula
             """;
-    private static final String SQL_FINDBYSTUDENTID = """
+    private static final String SQL_FIND_BY_STUDENTID = """
             SELECT *
             FROM matricula
             WHERE id_alumno = ?
@@ -32,81 +35,51 @@ public class EnrollementRepository {
             WHERE id_alumno = ? AND id_modulo = ?
             """;
 
-    private final PostgresqlDriver postgresqlDriver;
+    private final JdbcTemplate jdbcTemplate;
 
     public Enrollment insert(Enrollment e) {
-        Connection conn = null;
-        PreparedStatement ps = null;
+        log.info("Creating enrollment - Student ID: {}, Module ID: {}, Date: {}",
+                e.getStudentId(), e.getModuleId(), e.getDate());
 
-        try {
-            conn = postgresqlDriver.getConnection();  // ⚠️SIN try-with-resources
-            ps = conn.prepareStatement(SQL_CREATE);
+        jdbcTemplate.update(SQL_CREATE, e.getStudentId(), e.getModuleId(),
+                e.getDate());
 
-            ps.setInt(1, e.getStudentId());
-            ps.setInt(2, e.getModuleId());
-            ps.setDate(3, Date.valueOf(e.getDate()));
-            ps.executeUpdate();
-
-            log.info("create OK: {}", e);
-            return e;
-        } catch (SQLException er) {
-            throw new RuntimeException("Error creating Enrollment", er);
-        } finally {
-            // Cerrar solo PreparedStatement, NO la Connection
-            try {
-                if (ps != null) ps.close();
-            } catch (SQLException ex) {
-                log.warn("Error closing PreparedStatement", ex);
-            }
-            // ⚠️NO cerrar conn aquí - se cerrará en commit()/rollback()
-        }
+        log.info("Enrollment created successfully");
+        return e;
     }
+
 
     public List<Enrollment> findAll() {
-        List<Enrollment> enrollments = new ArrayList<>();
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL_FINDALL);
-             ResultSet rs = ps.executeQuery())
-        {
-            while (rs.next())
-            {
-                Enrollment enrollment = mapRow(rs);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error reading Student", e);
-        }
+        log.info("Finding all enrollments");
+        List<Enrollment> e = jdbcTemplate.query(SQL_FIND_ALL, (rs, rowNum) -> new Enrollment(
+                rs.getInt("id_alumno"),
+                rs.getInt("id_modulo"),
+                rs.getDate("fecha").toLocalDate()
+                )
+        );
+        log.info("FindAll enrollments OK");
+        return e;
+    }
+    public List<Enrollment> findByStudent(int studentId) {
+        List<Enrollment> enrollments = jdbcTemplate.query(SQL_FIND_BY_STUDENTID, (rs, rowNum) -> new Enrollment(
+                        rs.getInt("id_alumno"),
+                        rs.getInt("id_modulo"),
+                        rs.getDate("fecha").toLocalDate()
+                ),
+                studentId);
+
+        log.info("FindByStudent OK student ID: {}", studentId);
         return enrollments;
     }
-    public Enrollment findById(Integer id) {
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL_FINDBYSTUDENTID)) {
-            ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
-                return null;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error reading Student", e);
-        }
-    }
-    public boolean delete(Integer id) {
-        try (Connection conn = postgresqlDriver.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL_DELETE)) {
-            ps.setInt(1, id);
-            int deleted = ps.executeUpdate();
-            log.info("delete OK: {}", deleted > 0);
-            return deleted > 0;
-        } catch (SQLException e) {
-            throw new RuntimeException("Error deleting Student", e);
-        }
-    }
-    private Enrollment mapRow(ResultSet rs) throws SQLException {
-        Enrollment en = new Enrollment();
-        en.setStudentId(rs.getInt("id_alumno"));
-        en.setModuleId(rs.getInt("id_module"));
-        en.setDate(rs.getDate("fecha").toLocalDate());
 
-        return en;
-    }
+    public boolean delete(int studentId, int moduleId) {
+        log.info("Borrando Matricula - Student Id: {}, Module Id: {}", studentId, moduleId);
 
+        int deleted = jdbcTemplate.update(SQL_DELETE, studentId, moduleId);
+        boolean pass = deleted > 0;
+
+        log.info("Matriculada Borrada {} - Student ID: {}, Module ID: {}",
+                pass ? "SI" : "NO", studentId, moduleId);
+        return pass;
+    }
 }
