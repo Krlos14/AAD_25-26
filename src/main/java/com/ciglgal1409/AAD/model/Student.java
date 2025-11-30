@@ -10,7 +10,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
-    private int id;
+
+    private Integer id;
     private String nif;
     private String name;
     private String email;

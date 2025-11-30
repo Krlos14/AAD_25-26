@@ -29,8 +29,8 @@ public class AadApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        Student miriam = new Student(2, "66280457F", "Miriam", "miriam@g.educaand.et");
-        Module programacion = new Module(2, "0425", "Programacion", 250);
+        Student miriam = new Student(null, "66280457F", "Miriam", "miriam@g.educaand.et");
+        Module programacion = new Module(null, "0425", "Programacion", 250);
         miriam = studentManagementService.createStudent(miriam);
         programacion = studentManagementService.createModule(programacion);
         int modulosMatriculados = studentManagementService.countEnrollments(miriam.getId());

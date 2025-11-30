@@ -16,7 +16,7 @@ public class StudentRepository implements CustomService<Student> {
 
     private static final String SQL_INSERT = """
             INSERT INTO alumno (nif, nombre, email)
-            VALUES ( ?, ?, ?)
+            VALUES (?, ?, ?)
             """;
 
     private static final String SQL_SELECT = """

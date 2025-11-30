@@ -10,7 +10,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class Module {
-    private int id;
+
+    private Integer id;
     private String code;
     private String name;
     private int hours;
