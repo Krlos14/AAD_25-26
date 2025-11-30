@@ -104,7 +104,7 @@ public class StudentManagementService implements CustomService{
                 .withFunctionName("count_enrollments");
 
         MapSqlParameterSource in = new MapSqlParameterSource()
-                .addValue("student_id", studentId);
+                .addValue("p_student_id", studentId);
 
         int count = countEnrollmentsCall.executeFunction(Integer.class, in);
 
