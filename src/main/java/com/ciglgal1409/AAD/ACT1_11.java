@@ -10,116 +10,140 @@ import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
-@SpringBootApplication
-@Slf4j
-public class ACT1_11 implements CommandLineRunner
-{
 
-    public static void main(String[] args)
-    {
+@Slf4j
+@SpringBootApplication
+public class ACT1_11 implements CommandLineRunner {
+
+    public static Scanner scanner = new Scanner(System.in);
+
+    public static void main(String[] args) {
         SpringApplication.run(AadApplication.class, args);
     }
 
     @Override
-    public void run ( String... args ) throws Exception
-    {
+    public void run(String... args) {
+        Path directorio = null;
 
-        int bucle= 0;
-        Scanner s = new Scanner(System.in);
-        Path ruta; //Variable creada para la ruta del directorio
+        while (directorio == null) {
+            log.info("Introduce la ruta del directorio:");
+            String ruta = scanner.nextLine();
+            Path rutaUsuario = Paths.get(ruta);
 
-        log.info("¿Que directorio quieres?");
-        ruta = Paths.get(s.nextLine());
-
-        File ruta2 = new File(ruta.toString()); //Clona ruta en ruta2 pero lo convierte en file2
-        if (Files.exists(ruta) && Files.isDirectory(ruta)) {
-            File[] archivos = ruta2.listFiles();
-
-            if (archivos != null) {
-                for (File archivo : archivos) {
-                    if (archivo.isDirectory()) {
-                        System.out.println("[DIR]  " + archivo.getName());
-                    } else {
-                        long espacio = archivo.length(); //Carga el almacenamiento del archivo en espacio para luego mostrarlo en pantalla
-                        long ultimaModificacion = archivo.lastModified();
-                        String fecha = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(ultimaModificacion));
-                        log.info("[FILE] " + archivo.getName() +
-                                " | " + espacio + " bytes" +
-                                " | modificado: " + fecha);
-                    }
-                }
+            if (!Files.exists(rutaUsuario) || !Files.isDirectory(rutaUsuario)) { //Comprueba si el directorio existe y que no sea otra cosa
+                log.warn("El directorio no existe o no es válido, vuelve a introducirlo.");
+            } else {
+                directorio = rutaUsuario;
             }
-        } else {
-            System.out.println("La ruta no es un directorio válido.");
         }
 
-        while((bucle <= 4))
-        { //Bucle hecho para poder usar el menú
+        MostrarContenido(directorio);
+        MostrarMenu(directorio);
+    }
 
-            log.info ("1)Crear nuevo fichero");
-            log.info ("2)Mover fichero de ubicación");
-            log.info ("3)Borrar un fichero ");
+    public static void MostrarContenido(Path directorio) {
+        log.info("Mostrando contenido de: " + directorio.toAbsolutePath());
+        try {
+            Files.list(directorio).forEach(path -> {
+                File fichero = path.toFile();
+                String nombre = fichero.getName();
+                long bytes = fichero.length();
+                String fecha = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date(fichero.lastModified()));
 
-            bucle = s.nextInt();
-            s.nextLine();
+                log.info(String.format("%-30s | %10d bytes | %s", nombre, bytes, fecha)); //Muestra el nombre, los numero de bytes y la última modificación
+            });
+        } catch (IOException e) {
+            log.error("Error al mostrar el contenido: {}", e.getMessage(), e);
+        }
+    }
 
-            switch(bucle)
-            {
+    public static void MostrarMenu(Path directorio) {
+        boolean salir = false;
+        while (!salir) {
+            log.info("MENU");
+            log.info("************");
+            log.info("1. Crear un nuevo fichero vacío");
+            log.info("2. Mover un fichero a otra ubicación");
+            log.info("3. Borrar un fichero existente");
+            log.info("4. Salir");
+            log.info("************");
+            log.info("Que opción quieres elegir");
+            int opc = scanner.nextInt();
+            scanner.nextLine(); //Sirve para depurar el escaner y que no de ningun error
+
+            switch (opc) {
                 case 1:
-                    log.info ("¿Que nombre del fichero quieres?");
-                    String nombre = s.nextLine();
-
-                    log.info ("¿Que directorio lo creamos?");
-                    ruta = Paths.get(s.nextLine());
-                    Path nuevoFichero = ruta.resolve(nombre); //Junta el directorio con el nombre de fichero
-                    try
-                    {
-                        if (!Files.exists(nuevoFichero))//Comprueba la existencia del fichero
-                        {
-                           Files.createDirectories(nuevoFichero);
-                           log.info(("Fichero creado "));
-                        } else {
-                            log.warn("El fichero ya existe."); //AVISO de que ya existe
-                        }
-                    } catch (IOException e)
-                      {
-                            log.warn("Error al cargar fichero." + e.getMessage());
-                      }
+                    crearFichero(directorio);
                     break;
                 case 2:
-
-                    log.info("¿De que directorio quieres moverlo?");
-                    ruta = Paths.get(s.nextLine());
-                    log.info("¿A que directorio movemos el archivo?");
-                    Path ruta3 = Paths.get(s.nextLine());
-
-                    // Para poner el mismo nombre de archivo en la nueva ruta
-                    if (Files.isDirectory(ruta3)) {
-                        ruta3 = ruta3.resolve(ruta.getFileName());
-                    }
-                  try
-                  {
-                      Files.move(ruta,ruta3); //Con este comando movemos el archivo deseado del directorio "ruta" a la que quiera el usaurio
-                  } catch (IOException e)
-                      {
-                          log.warn("Error al mover fichero." + e.getMessage());
-                      }
+                    moverFichero();
                     break;
-                  case 3:
-                      try
-                  {
-                      log.info("Que archivo deseas eliminar");
-                      ruta = Paths.get(s.nextLine());
-                      Files.deleteIfExists(ruta);
-                  } catch (IOException e)
-                      {
-                          log.warn("Error al eliminar fichero." + e.getMessage());
-                      }
-                      break;
+                case 3:
+                    borrarFichero();
+                    break;
+                case 4:
+                    salir = true;
+                    log.info("Saliendo del programa");
+                    break;
+                default:
+                    log.info("Introduzca una opción valida");
             }
+        }
+    }
 
+    public static void crearFichero(Path directorio) {
+        log.info("Introduce el nombre del fichero:");
+        String nombre = scanner.nextLine();
+        Path nuevoFichero = directorio.resolve(nombre); //Junta la ruta del directorio con el nombre que hemos dado
+
+        try {
+            if (!Files.exists(nuevoFichero)) {
+                Files.createFile(nuevoFichero);
+                log.info("Fichero creado correctamente.");
+            } else {
+                log.warn("El fichero ya existe.");
+            }
+        } catch (IOException e) {
+            log.error("Error al crear el fichero: " + e.getMessage());
+        }
+    }
+
+    public static void moverFichero() {
+        log.info("Introduce la ruta del fichero que quieres mover (incluye el nombre del fichero):");
+        String rutaorigen = scanner.nextLine();
+        Path origen = Paths.get(rutaorigen);
+
+        if (!Files.exists(origen)) {
+            log.warn("El fichero no existe.");
+            return;
         }
 
+        log.info("Introduce la ruta de destino (incluye el nombre del fichero):");
+        String rutadestino = scanner.nextLine();
+        Path destino = Paths.get(rutadestino);
+
+        try {
+            Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
+            log.info("Fichero movido exitosamente a " + destino.toAbsolutePath());
+        } catch (IOException e) {
+            log.error("Error al mover el fichero: " + e.getMessage());
+        }
+    }
+
+    public static void borrarFichero() {
+        log.info("Introduce la ruta absoluta del fichero:");
+        String ruta = scanner.nextLine();
+        Path fichero = Paths.get(ruta);
+
+        try {
+            if (Files.exists(fichero)) {
+                Files.delete(fichero); //Borra el fichero especificado
+                log.info("Fichero borrado exitosamente.");
+            } else {
+                log.warn("El fichero no existe.");
+            }
+        } catch (IOException e) {
+            log.error("Error al borrar el fichero: " + e.getMessage());
+        }
     }
 }
-
