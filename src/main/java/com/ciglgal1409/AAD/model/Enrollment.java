@@ -1,19 +1,27 @@
 package com.ciglgal1409.AAD.model;
 
-import lombok.*;
-
+import jakarta.persistence.*;
+import lombok.Data;
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "enrollments")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@Getter
-@Setter
-
 public class Enrollment {
 
-    private int studentId;
-    private int moduleId;
-    private LocalDate date;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
+
+    @ManyToOne
+    @JoinColumn(name = "module_id")
+    private Module module;
+
+    private LocalDate enrollmentDate;
+    private Double finalGrade;
 }

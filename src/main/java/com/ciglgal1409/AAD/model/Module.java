@@ -1,17 +1,22 @@
 package com.ciglgal1409.AAD.model;
 
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Data;
+import java.util.List;
 
+@Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@Getter
-@Setter
-
 public class Module {
-    private int id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String code;
     private String name;
-    private int hours;
+    private Integer hours;
+
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
+    private List<Enrollment> enrollments;
 }

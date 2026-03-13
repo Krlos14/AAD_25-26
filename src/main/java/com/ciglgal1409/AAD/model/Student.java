@@ -1,19 +1,22 @@
 package com.ciglgal1409.AAD.model;
 
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Data;
+import java.util.List;
 
+@Entity
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@Getter
-@Setter
-
 public class Student {
-    private int id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String nif;
     private String name;
     private String email;
-    //private String curse;
-    //private List<Module> modules;
+    private String course;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<Enrollment> enrollments;
 }
