@@ -25,7 +25,7 @@ public class ManagementService {
 
     @Transactional
     public com.ciglgal1409.AAD.model.Module createModule(com.ciglgal1409.AAD.model.Module module) {
-        return moduleRepository.save(module); // Ahora sí coincidirán los tipos
+        return moduleRepository.save(module);
     }
 
     @Transactional
@@ -33,7 +33,7 @@ public class ManagementService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Alumno no encontrado"));
 
-        // Buscamos usando tu clase específica
+
         com.ciglgal1409.AAD.model.Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new RuntimeException("Módulo no encontrado"));
 

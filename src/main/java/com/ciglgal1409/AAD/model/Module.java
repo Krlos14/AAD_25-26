@@ -16,7 +16,6 @@ public class Module {
     private String name;
     private Integer hours;
 
-
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
     private List<Enrollment> enrollments;
 }
